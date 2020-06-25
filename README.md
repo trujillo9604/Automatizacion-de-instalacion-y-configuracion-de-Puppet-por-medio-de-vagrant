@@ -1,14 +1,25 @@
-# Automatizacion-de-instalacion-y-configuracion-de-Puppet-por-medio-de-vagrant
+# Automatizacion-de-la-instalacion-y-configuracion-de-Puppet-por-medio-de-Vagrant
 
-Se despliega y configura Puppetmaster y Puppet agent nodes,  por medio de Vagrant. Posteriormente se anexan los manifest, files y script que permiten el despliegue y configuración de HTCondor a través de Puppet. 
+El procedimiento a realizar estara dado por el despliegue y configuracion de Puppet master quien actuara como el servidor que tendra las configuraciones para los clientes o tambien llamados, Puppet agent nodes. Posteriormente se anexan los manifest, files y script que permiten el despliegue y configuración de HTCondor a través de Puppet. 
 
-El entorno en el que se ejecuta este proyecto esta dado por 3 maquinas virtuales, generadas con Vagrant (herramienta para la creación y configuración de entornos de desarrollo virtualizados). Se tendran dos escenarios cliente-servidor al finalizar el despliegue del gestor de cossh nfiguracion (Puppet) y el gestor de cola de tareas (HTCondor) 
+El entorno en el que se desarrollo este proyecto esta dado por 3 maquinas virtuales, generadas con Vagrant (herramienta para la creación y configuración de entornos de desarrollo virtualizados). Se tendran dos escenarios cliente-servidor al finalizar el despliegue del gestor de configuracion (Puppet) y el gestor de cola de tareas (HTCondor). 
 
-Gracias al archivo Vagrantfile que se anexa en este repositorio, permitira agilizar la instalacion y configuracion de Puppet, entregando como resultado una maquina con rol de puppet master y 2 maquinas como clientes puppet o agentes. El archvio Vagrant file dotara estas 3 maquinas hasta el punto de certificarlas. El despliegue de HTCondor por medio de puppet se explicara en el transcurso del readme.
+Gracias al archivo Vagrantfile que se anexa en este repositorio, se permitira agilizar la instalacion y configuracion de Puppet, entregando como resultado una maquina con rol de Puppet master y 2 maquinas como clientes puppet, debidamente configuradas y certificadas por el Puppet master. El Puppet master debe aprobar una solicitud de certificado para cada nodo de agente antes de poder configurarlo. Este proceso se encuentra automatizado dentro del archivo Vagrantfile.  El despliegue de HTCondor estara dado posteriormente a la creacion de las maquinas virtuales. Puppet sera el encargado de gestar la configuracion de HTCondor en 2 de los 3 nodos creados con aterioridad. Esto se explicara en el transcurso del readme.
 
-Instalacion de Puppet-server y Puppet agent nodes en /ubuntu/xenial64.
+Las recomendaciones a tener en cuenta para que este entorno funcione conrrectamente y Puppet no presente problema alguno, es el siguiente.
 
-        Script para el despliegue de puppetserver en la maquina master llamada "puppet" 
+        1- Verificar y corregir las ubicaciones de cada proceso de aprovisionamiento (script, sincronizacion de carpeta compartida) en el archivo Vagrantfile.
+        2- La ejecucion de cualquier comando para el trabajo o configuracion de puppet en las maquinas virtuales debe ser efectuado con usuario root. 
+        3- La maquina que sera puppet master debera tener como minimo 3 gigas de Ram, debido a que en la inicializacion del proceso (puppetserver) por parte del              archivo Vagrantfile, por defecto viene configurada para uso de 2 gigas de ram. Esto se puede modificar en el archivo de configuracion de puppet                    ubicado en /etc/puppetlabs/puppet/puppet.conf. Para uso de este despliegue se han otorgado estas 3 gigas a la maquina virtual puppet master y asi                  evitar problemas en el despliegue.
+        4- Teniendo en cuenta la recomendacion anterior, se anota que para establecer un password para el usuario root basta con digitar el comando (sudo passwd              root).
+        
+A continuacion se muestra el archivo Vagrantfile, exponiendo los scripts utilizados y el aprovisionamiento para cada maquina desarrollado.
+
+# Instalacion de Puppet-server y Puppet agent nodes en 
+
+El box utilizado para las 3 maquinas virtuales sera /ubuntu/xenial64.
+
+#Script para el despliegue de puppetserver en la maquina master llamada "puppet" 
 
 Se actualiza los repositorios de la maquina.        
 sudo apt-get -y update
