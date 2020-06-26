@@ -1,6 +1,6 @@
 # Instalacion y configuracion de Puppet por medio de Vagrant
 
-El procedimiento a realizar esta dado por el despliegue y configuracion de Puppet. Posteriormente se anexan los manifest, files y script que permiten el despliegue y configuración de HTCondor a través de Puppet. 
+El procedimiento a realizar esta dado por el despliegue y configuracion de Puppet. Posteriormente se anexan los manifest, files y scripts soportan el despliegue y configuración de HTCondor a través de Puppet. 
 
 El entorno en el que se desarrolla este proyecto esta dado por 3 maquinas virtuales, generadas con Vagrant (herramienta para la creación y configuración de entornos de desarrollo virtualizados). Se tendran dos arquitecturas desplegadas con la ayuda de Vagrant, el cual sera master-agent, perteneciente al gestor de configuracion Puppet y al finalizar el despliegue y configuracion de Puppet, se tendra una arquitectura perteneciente a HTCondor (master-worker), la cual nos la facilitara el gestor de configuracion Puppet. Estas tres maquinas virtuales tendran como nombre: 
 
