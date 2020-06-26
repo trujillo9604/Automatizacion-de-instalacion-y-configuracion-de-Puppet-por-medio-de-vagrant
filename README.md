@@ -4,9 +4,9 @@ El procedimiento a realizar esta dado por el despliegue y configuracion de Puppe
 
 El entorno en el que se desarrolla este proyecto esta dado por 3 maquinas virtuales, generadas con Vagrant (herramienta para la creación y configuración de entornos de desarrollo virtualizados). Se tendran dos arquitecturas desplegadas con la ayuda de Vagrant, el cual sera master-agent, perteneciente al gestor de configuracion Puppet y al finalizar el despliegue y configuracion de Puppet, se tendra una arquitectura perteneciente a HTCondor (master-worker), la cual nos la facilitara el gestor de configuracion Puppet. Estas tres maquinas virtuales tendran como nombre: 
 
-puppet, quien sera el Puppet master de este entorno, 
+* puppet, quien sera el Puppet master de este entorno, 
 
-puppetagent1 y puppetagent2, quienes seran las maquinas que se encargaran de ser dotadas de un gestor de cola de tareas, a traves de Puppet y a su ves seran                  clientes puppet.
+* puppetagent1 y puppetagent2, quienes seran las maquinas que se encargaran de ser dotadas de un gestor de cola de tareas, a traves de Puppet y a su ves seran                  clientes puppet.
 
 Gracias al archivo Vagrantfile que se anexa en este repositorio, se permite agilizar la instalacion y configuracion del gestor de configuraciones Puppet, entregando como resultado una maquina con rol master y 2 maquinas como clientes, debidamente configuradas por el archivo Vagrantfile y certificadas por el puppet master para su posterior uso.
 El Puppet master debe aprobar una solicitud de certificado para cada nodo agente antes de poder configurarlo. Este proceso se encuentra automatizado dentro del archivo Vagrantfile.  El despliegue de HTCondor estara dado posteriormente a la creacion de las maquinas virtuales. Puppet sera el encargado de gestar la configuracion de HTCondor en 2 de los 3 nodos creados con anterioridad. Esto se explicara en el transcurso del readme.
@@ -62,14 +62,14 @@ En este desarrollo, las maquinas tienen un orden para crearse con Vagrant. Es de
 
 # Instalacion de puppet-agent en los nodos clientes puppet
 
-Actualizacion del box y sincronizacion de zona horaria
+* Actualizacion del box y sincronizacion de zona horaria
 
         sudo apt-get -y update
         sudo apt-get -y upgrade    
         sudo timedatectl set-timezone "America/Bogota"
         
 
-Instalacion de puppetagent
+* Instalacion de puppetagent
 
         sudo wget https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb
         sudo dpkg -i puppetlabs-release-pc1-xenial.deb
@@ -77,12 +77,10 @@ Instalacion de puppetagent
         sudo apt-get -y install puppet-agent
 
 
-Activacion de servicios puppet, con el fin de que cada cliente puppet logre generar una conexion con el puppet master.
+* Activacion de servicios puppet, con el fin de que cada cliente puppet logre generar una conexion con el puppet master.
 
         sudo systemctl start    puppet.service
         sudo systemctl enable   puppet.service
-
-SCRIPT
 
 # Creacion y configuracion de las maquinas virtuales.
 
@@ -90,7 +88,7 @@ En el proceso anterior se muestras los scripts para dotar las maquinas con los s
 
 Como se menciono anteriormente, inicialemente se crea las maquina clientes puppet y luego el puppet master.
 
-Nodo cliente puppet 1 
+* Nodo cliente puppet 1 
 
         Vagrant.configure('2') do |config|
         config.vm.define "puppetagent1" do |puppetagent1|
@@ -98,11 +96,11 @@ Nodo cliente puppet 1
         #Box a utilizar, previamente descargado
         puppetagent1.vm.box = 'ubuntu/xenial64'
 
-Hostname
+* Hostname
         
         puppetagent1.vm.hostname = "puppetagent1"
 
-IP privada
+* IP privada
         
         puppetagent1.vm.network 'private_network', ip: '192.168.20.19'
 
@@ -118,15 +116,12 @@ Este archivo ubicado en /etc/hosts permite apuntar un nombre de dominio de nuest
         puppetagent1.vm.provision "file", source: "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
         puppetagent1.vm.provision "shell", path: "añadir_hostname.sh", privileged: true
 
-* Revelar quien es su master        
+* Designar quien es su master        
 
 Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppet con relacion a master-agent, cada agente puppet debe conocer de antemano quien su master y esta configuracion se automatiza por medio del script "Puppet.conf_agentes.sh", el cual escribe en el archivo de configuracion de Puppet agent, instalado previamente en la maquina cliente y añade la linea de quien es su server. Este proceso queda automatizado por medio del script.
 
         puppetagent1.vm.provision "shell", path: "Puppet.conf_agentes.sh", privileged: true    
-            
-    end 
-
-
+         
 * Nodo de trabajo2
 
         config.vm.define "puppetagent2" do |puppetagent2|
@@ -150,10 +145,8 @@ Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppe
         puppetagent2.vm.provision "file", source: "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
         puppetagent2.vm.provision "shell", path: "añadir_hostname.sh", privileged: true
         puppetagent2.vm.provision "shell", path: "Puppet.conf_agentes.sh", privileged: true    
-            
-    end 
-
-* Maquina puppet master
+     
+  * Maquina puppet master
 
         config.vm.define "puppet" do |puppet|
     
@@ -164,7 +157,7 @@ Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppe
        
        puppet.vm.hostname = "puppet"
 
-+ IP privada
+* IP privada
         
         puppet.vm.network 'private_network', ip: '192.168.20.18'
 
@@ -183,11 +176,6 @@ Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppe
         puppet.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", 3072]   
 
-          end 
-        end
-      end
-
-
 # Despliegue de HTCondor por medio de Puppet.
 
 Finalizado el despliegue de Puppet en las 3 maquinas virtuales y posterior a esto, cada nodo con rol cliente puppet siendo certificado, se procede a desplegar el gestor de cola de tareas. Para esta operacion se anexan los manifest encargados de la configuracion de cada nodo cliente puppet. Es decir, cada manifest tendra el estado deseado para cada nodo cliente, y el puppet master se encargara de efectuar  y supervisar correctamente su configuracion. 
@@ -202,12 +190,12 @@ Los archivos manifest de Puppet son los archivos donde se declaran todos los rec
         
 Teniendo en cuenta lo anterior se exponen las recomendaciones para que el manifest de HTCondor sea tomado correctamente por puppet.
 
-Pasos en la maquina puppet master
+**** Pasos en la maquina puppet master
 
 * Se guardan los manifest subido al repositorio en la carpeta manifest de puppetserver. Esta carpeta se encuentra ubicada en                                                     /etc/puppetlabs/puppet/code/environment/production/manifest.
 * La carpeta modules subido al repositorio, sera reemplazada con el modules de puppet server en la ubicacion /etc/puppetlabs/puppet/code/environment/production/modules.         Esta carpeta contiene los files necesarios para configurar el entorno de HTCondor.
         
-#Pasos en los clientes Puppet
+**** Pasos en los clientes Puppet
 
 Teniendo ya los manifest y files necesarios alojados en el servidor master de puppet, se procede a pedir la configuracion por parte de cada nodo cliente al puppet             master. Para que este proceso se concluya de manera satisfactoria se debe habe realizado paso a paso las instrucciones dictadas, en las que incluyen, modificar las            ubicaciones de las carpetas, scripts y lo mas importante, tener el cliente verificado y certificado por el puppet server. El comando a correr es el siguiente.
         
