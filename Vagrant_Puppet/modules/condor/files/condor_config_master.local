@@ -1,5 +1,5 @@
 # Condor Master
-CONDOR_HOST = pupetagent1@example.com
+CONDOR_HOST = 192.168.20.19
 
 #Mail parameters:
 
