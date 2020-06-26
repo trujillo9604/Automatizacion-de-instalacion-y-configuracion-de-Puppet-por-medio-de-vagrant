@@ -21,13 +21,11 @@ Las recomendaciones a tener en cuenta para que este entorno funcione conrrectame
         
 A continuacion se muestra el archivo Vagrantfile, exponiendo los scripts utilizados y el aprovisionamiento para cada maquina desarrollado.
 
-# Instalacion de puppet-server y puppet-agent en los clientes puppet 
+# Instalacion de puppet-server y puppet-agent en la maquina master de puppet
 
 El box utilizado para las 3 maquinas virtuales sera /ubuntu/xenial64.
 
-Script para el despliegue de puppetserver en la maquina master llamada "puppet" 
-
-* Se actualiza los repositorios de la maquina.        
+* Se actualizan los repositorios de la maquina.        
 
         sudo apt-get -y update
         sudo apt-get -y upgrade    
@@ -37,7 +35,7 @@ Script para el despliegue de puppetserver en la maquina master llamada "puppet"
         sudo timedatectl set-timezone "America/Bogota"
         sudo hostnamectl set-hostname puppet               
 
-# Instalacion de puppetserver y puppetagent en la maquina master
+#### Instalacion de puppetserver y puppetagent en la maquina master
 
 * Agregamos los repositorios de Puppet desde el sitio oficial de Puppet, actualizamos los repositorios de nuestro box y posteriormente ejecutamos su instalacion.
 
@@ -190,12 +188,12 @@ Los archivos manifest de Puppet son los archivos donde se declaran todos los rec
         
 Teniendo en cuenta lo anterior se exponen las recomendaciones para que el manifest de HTCondor sea tomado correctamente por puppet.
 
-#### Pasos en la maquina puppet master
+#### Indicaciones en la maquina puppet master
 
 * Se guardan los manifest subido al repositorio en la carpeta manifest de puppetserver. Esta carpeta se encuentra ubicada en                                                     /etc/puppetlabs/puppet/code/environment/production/manifest.
 * La carpeta modules subido al repositorio, sera reemplazada con el modules de puppet server en la ubicacion /etc/puppetlabs/puppet/code/environment/production/modules.         Esta carpeta contiene los files necesarios para configurar el entorno de HTCondor.
         
-#### Pasos en los clientes Puppet
+#### Indicaciones en los clientes Puppet
 
 Teniendo ya los manifest y files necesarios alojados en el servidor master de puppet, se procede a pedir la configuracion por parte de cada nodo cliente al puppet             master. Para que este proceso se concluya de manera satisfactoria se debe habe realizado paso a paso las instrucciones dictadas, en las que incluyen, modificar las            ubicaciones de las carpetas, scripts y lo mas importante, tener el cliente verificado y certificado por el puppet server. El comando a correr es el siguiente.
         
