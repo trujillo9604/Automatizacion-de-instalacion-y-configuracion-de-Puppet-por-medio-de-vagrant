@@ -1,4 +1,4 @@
-# Instalacion-y-configuracion-de-Puppet-por-medio-de-Vagrant
+# Instalacion y configuracion de Puppet por medio de Vagrant
 
 El procedimiento a realizar esta dado por el despliegue y configuracion de Puppet. Posteriormente se anexan los manifest, files y script que permiten el despliegue y configuración de HTCondor a través de Puppet. 
 
@@ -27,19 +27,19 @@ El box utilizado para las 3 maquinas virtuales sera /ubuntu/xenial64.
 
 Script para el despliegue de puppetserver en la maquina master llamada "puppet" 
 
-Se actualiza los repositorios de la maquina.        
+* Se actualiza los repositorios de la maquina.        
 
         sudo apt-get -y update
         sudo apt-get -y upgrade    
 
-Sincronizar zona horaria en cada nodo del cluster. Si surge un problema de sincronizacion de tiempo, los certificados podran aparecer vencidos, existiendo discrepancias entre  el Puppet master y los Puppet agent nodes. 
+* Sincronizar zona horaria en cada nodo del cluster. Si surge un problema de sincronizacion de tiempo, los certificados podran aparecer vencidos, existiendo discrepancias entre  el Puppet master y los Puppet agent nodes. 
 
         sudo timedatectl set-timezone "America/Bogota"
         sudo hostnamectl set-hostname puppet               
 
 Instalacion de puppetserver y puppetagent en la maquina master
 
-Agregamos los repositorios de Puppet desde el sitio oficial de Puppet, actualizamos los repositorios de nuestro box y posteriormente ejecutamos su instalacion.
+* Agregamos los repositorios de Puppet desde el sitio oficial de Puppet, actualizamos los repositorios de nuestro box y posteriormente ejecutamos su instalacion.
 
         sudo wget https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb
         sudo dpkg -i puppetlabs-release-pc1-xenial.deb
@@ -47,11 +47,11 @@ Agregamos los repositorios de Puppet desde el sitio oficial de Puppet, actualiza
         sudo apt-get -y install puppet-agent
         sudo apt-get -y install puppetserver
 
-Nos asegurarnos de que el puppetserver.service y el firewall permitan que el proceso JVM de Puppet Server acepte conexiones en el puerto 8140. Además, los clientes puppet deben poder realizar la conexión al maestro en ese mismo puerto. Esta configuracion es predeterminada para esta herramienta.
+* Nos asegurarnos de que el puppetserver.service y el firewall permitan que el proceso JVM de Puppet Server acepte conexiones en el puerto 8140. Además, los clientes puppet deben poder realizar la conexión al maestro en ese mismo puerto. Esta configuracion es predeterminada para esta herramienta.
 
         sudo ufw allow 8140   
 
-Finalizada la instalacion iniciamos el servicio de puppetserver.service y dejamos habilitado el servicio, para cada momento que la maquina inice. Es de considerar que esta maquina es la encargada de administrar los clientes puppet y velara  por la configuracion establecida para cada uno.
+* Finalizada la instalacion iniciamos el servicio de puppetserver.service y dejamos habilitado el servicio, para cada momento que la maquina inice. Es de considerar que esta maquina es la encargada de administrar los clientes puppet y velara  por la configuracion establecida para cada uno.
 
         sudo systemctl  start   puppetserver.service
         sudo systemctl  enable  puppetserver.service
@@ -146,7 +146,7 @@ Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppe
         puppetagent2.vm.provision "shell", path: "añadir_hostname.sh", privileged: true
         puppetagent2.vm.provision "shell", path: "Puppet.conf_agentes.sh", privileged: true    
      
-  * Maquina puppet master
+* Maquina puppet master
 
         config.vm.define "puppet" do |puppet|
     
@@ -190,12 +190,12 @@ Los archivos manifest de Puppet son los archivos donde se declaran todos los rec
         
 Teniendo en cuenta lo anterior se exponen las recomendaciones para que el manifest de HTCondor sea tomado correctamente por puppet.
 
-**** Pasos en la maquina puppet master
+#### Pasos en la maquina puppet master
 
 * Se guardan los manifest subido al repositorio en la carpeta manifest de puppetserver. Esta carpeta se encuentra ubicada en                                                     /etc/puppetlabs/puppet/code/environment/production/manifest.
 * La carpeta modules subido al repositorio, sera reemplazada con el modules de puppet server en la ubicacion /etc/puppetlabs/puppet/code/environment/production/modules.         Esta carpeta contiene los files necesarios para configurar el entorno de HTCondor.
         
-**** Pasos en los clientes Puppet
+#### Pasos en los clientes Puppet
 
 Teniendo ya los manifest y files necesarios alojados en el servidor master de puppet, se procede a pedir la configuracion por parte de cada nodo cliente al puppet             master. Para que este proceso se concluya de manera satisfactoria se debe habe realizado paso a paso las instrucciones dictadas, en las que incluyen, modificar las            ubicaciones de las carpetas, scripts y lo mas importante, tener el cliente verificado y certificado por el puppet server. El comando a correr es el siguiente.
         
