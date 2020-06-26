@@ -1,4 +1,4 @@
-node 'condorpuppet' {
+node 'puppetagent1' {
 
 
 #Añadir repositorio de HTCondor
