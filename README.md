@@ -4,8 +4,8 @@ El procedimiento a realizar esta dado por el despliegue y configuracion de Puppe
 
 El entorno en el que se desarrolla este proyecto esta dado por 3 maquinas virtuales, generadas con Vagrant (herramienta para la creación y configuración de entornos de desarrollo virtualizados). Se tendran dos arquitecturas desplegadas con la ayuda de Vagrant, el cual sera master-agent, perteneciente al gestor de configuracion Puppet y al finalizar el despliegue y configuracion de Puppet, se tendra una arquitectura perteneciente a HTCondor (master-worker), la cual nos la facilitara el gestor de configuracion Puppet. Estas tres maquinas virtuales tendran como nombre: 
 
-1- puppet, quien sera el Puppet master de este entorno, 
-2- puppetagent1 y puppetagent2, quienes seran las maquinas que se encargaran de ser dotadas de un gestor de cola de tareas, a traves de Puppet y a su ves seran clientes puppet.
+        1- puppet, quien sera el Puppet master de este entorno, 
+        2- puppetagent1 y puppetagent2, quienes seran las maquinas que se encargaran de ser dotadas de un gestor de cola de tareas, a traves de Puppet y a su ves seran clientes            puppet.
 
 Gracias al archivo Vagrantfile que se anexa en este repositorio, se permite agilizar la instalacion y configuracion del gestor de configuraciones Puppet, entregando como resultado una maquina con rol master y 2 maquinas como clientes, debidamente configuradas por el archivo Vagrantfile y certificadas por el puppet master para su posterior uso.
 El Puppet master debe aprobar una solicitud de certificado para cada nodo agente antes de poder configurarlo. Este proceso se encuentra automatizado dentro del archivo Vagrantfile.  El despliegue de HTCondor estara dado posteriormente a la creacion de las maquinas virtuales. Puppet sera el encargado de gestar la configuracion de HTCondor en 2 de los 3 nodos creados con anterioridad. Esto se explicara en el transcurso del readme.
@@ -26,38 +26,38 @@ El box utilizado para las 3 maquinas virtuales sera /ubuntu/xenial64.
 
 #Script para el despliegue de puppetserver en la maquina master llamada "puppet" 
 
-Se actualiza los repositorios de la maquina.        
+        Se actualiza los repositorios de la maquina.        
 
-sudo apt-get -y update
-sudo apt-get -y upgrade    
+        sudo apt-get -y update
+        sudo apt-get -y upgrade    
 
-Sincronizar zona horaria en cada nodo del cluster. Si surge un problema de sincronizacion de tiempo, los certificados podran aparecer vencidos, existiendo discrepancias entre  el Puppet master y los Puppet agent nodes. 
+#Sincronizar zona horaria en cada nodo del cluster. Si surge un problema de sincronizacion de tiempo, los certificados podran aparecer vencidos, existiendo discrepancias entre  #el Puppet master y los Puppet agent nodes. 
 
-sudo timedatectl set-timezone "America/Bogota"
-sudo hostnamectl set-hostname puppet               
+        sudo timedatectl set-timezone "America/Bogota"
+        sudo hostnamectl set-hostname puppet               
 
 #Instalacion de puppetserver y puppetagent en la maquina master
 
 #Agregamos los repositorios de Puppet desde el sitio oficial de Puppet, actualizamos los repositorios de nuestro box y posteriormente ejecutamos su instalacion.
 
-sudo wget https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb
-sudo dpkg -i puppetlabs-release-pc1-xenial.deb
-sudo apt-get -y update
-sudo apt-get -y install puppet-agent
-sudo apt-get -y install puppetserver
+        sudo wget https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb
+        sudo dpkg -i puppetlabs-release-pc1-xenial.deb
+        sudo apt-get -y update
+        sudo apt-get -y install puppet-agent
+        sudo apt-get -y install puppetserver
 
 Nos asegurarnos de que el puppetserver.service y el firewall permitan que el proceso JVM de Puppet Server acepte conexiones en el puerto 8140. Además, los clientes puppet deben poder realizar la conexión al maestro en ese mismo puerto. Esta configuracion es predeterminada para esta herramienta.
 
-sudo ufw allow 8140   
+        sudo ufw allow 8140   
 
 #Finalizada la instalacion iniciamos el servicio de puppetserver.service y dejamos habilitado el servicio, para cada momento que la maquina inice. Es de considerar que esta maquina es la encargada de administrar los clientes puppet y velara  por la configuracion establecida para cada uno.
 
-sudo systemctl  start   puppetserver.service
-sudo systemctl  enable  puppetserver.service
+        sudo systemctl  start   puppetserver.service
+        sudo systemctl  enable  puppetserver.service
 
 #Firmar certificados de los clientes puppet
 
-En este desarrollo, las maquinas tienen un orden para crearse con Vagrant. Es decir, inicialmente se deben crear las maquinas clientes puppet (puppetagent1 y puppetagent2) y por ultimo el puppet master. Esto es debido a que el servicio puppetserver.service debe recibir un certificado SSL por parte de cada cliente puppet y posteriormente ser validadas (firmadas) por el puppetserver. Si creamos primero la maquina puppet master y luego los clientes puppet, indicara que primero se iniciara el servicio puppetser.service y hasta ese momento no existira ningun agente creado para certificar. En el momento que los agentes son creados, las maquinas pueden ser firmadas por el nodo puppet master, pero se debera reiniciar el servicio puppetserver.service. Con este orden de creacion nos evitamos ese paso y tendremos un despliegue mucho mas automatizado con Vagrant.
+        En este desarrollo, las maquinas tienen un orden para crearse con Vagrant. Es decir, inicialmente se deben crear las maquinas clientes puppet (puppetagent1 y                     puppetagent2) y por ultimo el puppet master. Esto es debido a que el servicio puppetserver.service debe recibir un certificado SSL por parte de cada cliente puppet y             posteriormente ser validadas (firmadas) por el puppetserver. Si creamos primero la maquina puppet master y luego los clientes puppet, indicara que primero se iniciara el         servicio puppetser.service y hasta ese momento no existira ningun agente creado para certificar. En el momento que los agentes son creados, las maquinas pueden ser               firmadas por el nodo puppet master, pero se debera reiniciar el servicio puppetserver.service. Con este orden de creacion nos evitamos ese paso y tendremos un despliegue         mucho mas automatizado con Vagrant.
 
 # Instalacion de puppet-agent en los nodos clientes puppet
 
@@ -148,10 +148,12 @@ Como se menciono anteriormente, inicialemente se crea las maquina clientes puppe
         config.vm.define "puppet" do |puppet|
     
 #Box a utilizar, previamente descargado
-        puppet.vm.box = 'ubuntu/xenial64'
+       
+       puppet.vm.box = 'ubuntu/xenial64'
 
 #Hostname
-        puppet.vm.hostname = "puppet"
+       
+       puppet.vm.hostname = "puppet"
 
 #IP privada
         
@@ -168,6 +170,7 @@ Como se menciono anteriormente, inicialemente se crea las maquina clientes puppe
         
 
 #Personalizar maquina virtual    
+        
         puppet.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", 3072]   
 
