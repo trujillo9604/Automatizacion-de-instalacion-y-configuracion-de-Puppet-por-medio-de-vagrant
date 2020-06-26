@@ -1,4 +1,4 @@
-node 'worker'
+node 'puppetagent2'
 
 {
 
