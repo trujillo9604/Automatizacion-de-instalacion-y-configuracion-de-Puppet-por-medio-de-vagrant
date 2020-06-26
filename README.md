@@ -21,7 +21,7 @@ Las recomendaciones a tener en cuenta para que este entorno funcione conrrectame
         
 A continuacion se muestra el archivo Vagrantfile, exponiendo los scripts utilizados y el aprovisionamiento para cada maquina desarrollado.
 
-# Instalacion de puppet-server y puppet-agent en nodo puppet master 
+# Instalacion de puppet-server y puppet-agent en los clientes puppet 
 
 El box utilizado para las 3 maquinas virtuales sera /ubuntu/xenial64.
 
@@ -37,7 +37,7 @@ Script para el despliegue de puppetserver en la maquina master llamada "puppet"
         sudo timedatectl set-timezone "America/Bogota"
         sudo hostnamectl set-hostname puppet               
 
-Instalacion de puppetserver y puppetagent en la maquina master
+# Instalacion de puppetserver y puppetagent en la maquina master
 
 * Agregamos los repositorios de Puppet desde el sitio oficial de Puppet, actualizamos los repositorios de nuestro box y posteriormente ejecutamos su instalacion.
 
