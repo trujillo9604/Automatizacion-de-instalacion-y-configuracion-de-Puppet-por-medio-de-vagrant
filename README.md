@@ -13,26 +13,26 @@ El Puppet master debe aprobar una solicitud de certificado para cada nodo agente
 
 Las recomendaciones a tener en cuenta para que este entorno funcione conrrectamente y Puppet no presente problema alguno, es el siguiente.
 
-        1- Se anota que la maquina puppet master tendra el nombre de puppet y los nodos clientes tendran el nombre de puppetagent1 y puppetagent2.  
-        2- Verificar y corregir las ubicaciones de cada proceso de aprovisionamiento (script, sincronizacion de carpeta compartida) en el archivo Vagrantfile.
-        3- La ejecucion de cualquier comando para el trabajo o configuracion de puppet en las maquinas virtuales debe ser efectuado con usuario root. 
-        4- Teniendo en cuenta la recomendacion anterior, se anota que para establecer un password para el usuario root basta con digitar el comando (sudo passwd                            root).
-        5- La maquina que sera puppet master debera tener como minimo 3 gigas de Ram, debido a que en la inicializacion del proceso (puppetserver.service) en su archivo de              configuracion viene por defecto para uso de 2 gigas de ram despues de su instalacion. Esto se puede modificar en su propio archivo de configuracion ubicado en                /etc/puppetlabs/puppet/puppet.conf. Puppet Server es el software que se instala una unica ves en el puppet master y es el encargado de hacer cumplir el rol de                nodo master.  Para uso de este despliegue se han otorgado estas 3 gigas de Ram a la maquina virtual puppet master y asi evitar problemas en el despliegue.
+* Se anota que la maquina puppet master tendra el nombre de puppet y los nodos clientes tendran el nombre de puppetagent1 y puppetagent2.  
+* Verificar y corregir las ubicaciones de cada proceso de aprovisionamiento (script, sincronizacion de carpeta compartida) en el archivo Vagrantfile.
+* La ejecucion de cualquier comando para el trabajo o configuracion de puppet en las maquinas virtuales debe ser efectuado con usuario root. 
+* Teniendo en cuenta la recomendacion anterior, se anota que para establecer un password para el usuario root basta con digitar el comando (sudo passwd                         root).
+* La maquina que sera puppet master debera tener como minimo 3 gigas de Ram, debido a que en la inicializacion del proceso (puppetserver.service) en su archivo de               configuracion viene por defecto para uso de 2 gigas de ram despues de su instalacion. Esto se puede modificar en su propio archivo de configuracion ubicado en                 /etc/puppetlabs/puppet/puppet.conf. Puppet Server es el software que se instala una unica ves en el puppet master y es el encargado de hacer cumplir el rol de                 nodo master.  Para uso de este despliegue se han otorgado estas 3 gigas de Ram a la maquina virtual puppet master y asi evitar problemas en el despliegue.
         
- A continuacion se muestra el archivo Vagrantfile, exponiendo los scripts utilizados y el aprovisionamiento para cada maquina desarrollado.
+A continuacion se muestra el archivo Vagrantfile, exponiendo los scripts utilizados y el aprovisionamiento para cada maquina desarrollado.
 
 # Instalacion de puppet-server y puppet-agent en nodo puppet master 
 
 El box utilizado para las 3 maquinas virtuales sera /ubuntu/xenial64.
 
-#Script para el despliegue de puppetserver en la maquina master llamada "puppet" 
+Script para el despliegue de puppetserver en la maquina master llamada "puppet" 
 
-        Se actualiza los repositorios de la maquina.        
+Se actualiza los repositorios de la maquina.        
 
         sudo apt-get -y update
         sudo apt-get -y upgrade    
 
-Sincronizar zona horaria en cada nodo del cluster. Si surge un problema de sincronizacion de tiempo, los certificados podran aparecer vencidos, existiendo discrepancias entre  #el Puppet master y los Puppet agent nodes. 
+Sincronizar zona horaria en cada nodo del cluster. Si surge un problema de sincronizacion de tiempo, los certificados podran aparecer vencidos, existiendo discrepancias entre  el Puppet master y los Puppet agent nodes. 
 
         sudo timedatectl set-timezone "America/Bogota"
         sudo hostnamectl set-hostname puppet               
@@ -106,19 +106,19 @@ IP privada
         
         puppetagent1.vm.network 'private_network', ip: '192.168.20.19'
 
-Aprovisionamiento de maquina 
+* Aprovisionamiento de maquina 
 
         puppetagent1.vm.provision "shell", inline: "sudo hostnamectl set-hostname puppetagent1"
         puppetagent1.vm.provision "shell", inline:  $script2, privileged: true, reset: true
 
-Modificar archivo hosts
+* Modificar archivo hosts
 
 Este archivo ubicado en /etc/hosts permite apuntar un nombre de dominio de nuestra elección a un servidor en concreto, a un ordenador en red local o a nuestra misma máquina a través de su IP, alias o dominio. Este archivo se modifica por medio del script "hosts.sh" el cual permite reemplazar el archivo propio de la maquina virtual creada, con un archivo hosts creado por nosotros, con la informacion de red de cada nodo. Debido a que trabajamos en un entorno virtual, tuvimos que apoyarnos en el recurso file de Vagrant, con el proposito de sincronizar la carpeta en donde se aloja nuestro archivo hosts y posteriormente poder reemplazarlo.
 
         puppetagent1.vm.provision "file", source: "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
         puppetagent1.vm.provision "shell", path: "añadir_hostname.sh", privileged: true
 
-Revelar quien es su master        
+* Revelar quien es su master        
 
 Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppet con relacion a master-agent, cada agente puppet debe conocer de antemano quien su master y esta configuracion se automatiza por medio del script "Puppet.conf_agentes.sh", el cual escribe en el archivo de configuracion de Puppet agent, instalado previamente en la maquina cliente y añade la linea de quien es su server. Este proceso queda automatizado por medio del script.
 
@@ -127,23 +127,23 @@ Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppe
     end 
 
 
-Nodo de trabajo2
+* Nodo de trabajo2
 
         config.vm.define "puppetagent2" do |puppetagent2|
   
-Box a utilizar, previamente descargado
+* Box a utilizar, previamente descargado
 
         puppetagent2.vm.box = 'ubuntu/xenial64'
 
-Hostname
+* Hostname
 
         puppetagent2.vm.hostname = "puppetagent2"
 
-IP privada
+* IP privada
 
         puppetagent2.vm.network 'private_network', ip: '192.168.20.20'
 
-Aprovisionamiento de maquina 
+* Aprovisionamiento de maquina 
 
         puppetagent2.vm.provision "shell", inline: "sudo hostnamectl set-hostname puppetagent2"
         puppetagent2.vm.provision "shell", inline:  $script2, privileged: true, reset: true
@@ -153,23 +153,23 @@ Aprovisionamiento de maquina
             
     end 
 
-Maquina puppet master
+* Maquina puppet master
 
         config.vm.define "puppet" do |puppet|
     
-Box a utilizar, previamente descargado
+* Box a utilizar, previamente descargado
        
        puppet.vm.box = 'ubuntu/xenial64'
-Hostname
+* Hostname
        
        puppet.vm.hostname = "puppet"
 
-IP privada
++ IP privada
         
         puppet.vm.network 'private_network', ip: '192.168.20.18'
 
 
-Aprovisionamiento de maquina 
+* Aprovisionamiento de maquina 
         
         puppet.vm.provision "shell", inline:  $script, privileged: true, reset: true
         puppet.vm.provision "file",  source:  "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
@@ -178,15 +178,14 @@ Aprovisionamiento de maquina
         
         
 
-Personalizar maquina virtual    
+* Personalizar maquina virtual    
         
         puppet.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", 3072]   
 
-        end 
-    end
-
-end
+          end 
+        end
+      end
 
 
 # Despliegue de HTCondor por medio de Puppet.
@@ -195,11 +194,11 @@ Finalizado el despliegue de Puppet en las 3 maquinas virtuales y posterior a est
 
 Los archivos manifest de Puppet son los archivos donde se declaran todos los recursos, es decir, servicios, paquetes o archivos que deben verificarse y cambiarse. Los archivos manifest de Puppet se crean en Puppet master y tienen la extensión .pp. Estos archivos son compuestos por las siguientes carpetas. 
 
-        Files: Son los archivos de texto sin formato que se deben importar y colocar en la ubicación de destino. 
-        Resources: Los recursos representan los elementos que necesitamos evaluar o cambiar. Los recursos pueden ser archivos, paquetes, etc. 
-        Node definition: Es un bloque de código en Puppet donde se define toda la información y definición del nodo del cliente. 
-        Templates: Los templates se utilizan para crear archivos de configuración en los nodos y se pueden reutilizar más tarde. 
-        Classes: Las classes son lo que utilizamos para agrupar los diferentes tipos de recursos.
+ * Files: Son los archivos de texto sin formato que se deben importar y colocar en la ubicación de destino. 
+ * Resources: Los recursos representan los elementos que necesitamos evaluar o cambiar. Los recursos pueden ser archivos, paquetes, etc. 
+ * Node definition: Es un bloque de código en Puppet donde se define toda la información y definición del nodo del cliente. 
+ * Templates: Los templates se utilizan para crear archivos de configuración en los nodos y se pueden reutilizar más tarde. 
+ * Classes: Las classes son lo que utilizamos para agrupar los diferentes tipos de recursos.
         
 Teniendo en cuenta lo anterior se exponen las recomendaciones para que el manifest de HTCondor sea tomado correctamente por puppet.
 
