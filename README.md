@@ -109,8 +109,18 @@ Como se menciono anteriormente, inicialemente se crea las maquina clientes puppe
 
         puppetagent1.vm.provision "shell", inline: "sudo hostnamectl set-hostname puppetagent1"
         puppetagent1.vm.provision "shell", inline:  $script2, privileged: true, reset: true
+
+#Modificar archivo hosts
+
+Este archivo ubicado en /etc/hosts permite apuntar un nombre de dominio de nuestra elección a un servidor en concreto, a un ordenador en red local o a nuestra misma máquina a través de su IP, alias o dominio. Este archivo se modifica por medio del script "hosts.sh" el cual permite reemplazar el archivo propio de la maquina virtual creada, con un archivo hosts creado por nosotros, con la informacion de red de cada nodo. Debido a que trabajamos en un entorno virtual, tuvimos que apoyarnos en el recurso file de Vagrant, con el proposito de sincronizar la carpeta en donde se aloja nuestro archivo hosts y posteriormente poder reemplazarlo.
+
         puppetagent1.vm.provision "file", source: "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
         puppetagent1.vm.provision "shell", path: "añadir_hostname.sh", privileged: true
+
+#Revelar quien es su master        
+
+Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppet con relacion a master-agent, cada agente puppet debe conocer de antemano quien su master y esta configuracion se automatiza por medio del script "Puppet.conf_agentes.sh", el cual escribe en el archivo de configuracion de Puppet agent, instalado previamente en la maquina cliente y añade la linea de quien es su server. Este proceso queda automatizado por medio del script.
+
         puppetagent1.vm.provision "shell", path: "Puppet.conf_agentes.sh", privileged: true    
             
     end 
