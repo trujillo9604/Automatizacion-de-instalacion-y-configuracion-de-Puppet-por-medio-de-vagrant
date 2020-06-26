@@ -55,9 +55,9 @@ Nos asegurarnos de que el puppetserver.service y el firewall permitan que el pro
         sudo systemctl  start   puppetserver.service
         sudo systemctl  enable  puppetserver.service
 
-#Firmar certificados de los clientes puppet
+# Firmar certificados de los clientes puppet
 
-        En este desarrollo, las maquinas tienen un orden para crearse con Vagrant. Es decir, inicialmente se deben crear las maquinas clientes puppet (puppetagent1 y                     puppetagent2) y por ultimo el puppet master. Esto es debido a que el servicio puppetserver.service debe recibir un certificado SSL por parte de cada cliente puppet y             posteriormente ser validadas (firmadas) por el puppetserver. Si creamos primero la maquina puppet master y luego los clientes puppet, indicara que primero se iniciara el         servicio puppetser.service y hasta ese momento no existira ningun agente creado para certificar. En el momento que los agentes son creados, las maquinas pueden ser               firmadas por el nodo puppet master, pero se debera reiniciar el servicio puppetserver.service. Con este orden de creacion nos evitamos ese paso y tendremos un despliegue         mucho mas automatizado con Vagrant.
+En este desarrollo, las maquinas tienen un orden para crearse con Vagrant. Es decir, inicialmente se deben crear las maquinas clientes puppet (puppetagent1 y                     puppetagent2) y por ultimo el puppet master. Esto es debido a que el servicio puppetserver.service debe recibir un certificado SSL por parte de cada cliente puppet y             posteriormente ser validadas (firmadas) por el puppetserver. Si creamos primero la maquina puppet master y luego los clientes puppet, indicara que primero se iniciara el         servicio puppetser.service y hasta ese momento no existira ningun agente creado para certificar. En el momento que los agentes son creados, las maquinas pueden ser               firmadas por el nodo puppet master, pero se debera reiniciar el servicio puppetserver.service. Con este orden de creacion nos evitamos ese paso y tendremos un despliegue         mucho mas automatizado con Vagrant.
 
 # Instalacion de puppet-agent en los nodos clientes puppet
 
