@@ -1,4 +1,4 @@
-# Automatizacion-de-la-instalacion-y-configuracion-de-Puppet-por-medio-de-Vagrant
+# Instalacion-y-configuracion-de-Puppet-por-medio-de-Vagrant
 
 El procedimiento a realizar esta dado por el despliegue y configuracion de Puppet. Posteriormente se anexan los manifest, files y script que permiten el despliegue y configuración de HTCondor a través de Puppet. 
 
