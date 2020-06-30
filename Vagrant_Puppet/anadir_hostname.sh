@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-sudo cp  -r /home/vagrant/archivos/hosts /etc/hosts 
+sudo cp  -r /vagrant/hosts /etc/hosts 
 
 #Modificar archivo hosts 
 numero="127.0.0.1 "
