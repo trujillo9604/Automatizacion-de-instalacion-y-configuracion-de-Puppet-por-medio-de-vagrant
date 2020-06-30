@@ -1,3 +1,43 @@
+# Pasos para ejecución
+
+Ingresar al directorio `Vagrant_Puppet` y ejecutar
+
+```
+vagrant up
+```
+
+Para validar la instalación se debe ejecutar los siguientes comandos:
+
+
+```
+vagrant ssh puppet
+sudo /opt/puppetlabs/puppet/bin/puppet cert list
+```
+
+Firmar los nodos.
+
+```
+sudo /opt/puppetlabs/puppet/bin/puppet cert sign puppetagent1.example.com
+sudo /opt/puppetlabs/puppet/bin/puppet cert sign puppetagent2.example.com
+```
+
+Move el directorio `/vagrant/modules` al `/etc/puppetlabs/code/environments/production/`
+
+```
+sudo mv /vagrant/modules /etc/puppetlabs/code/environments/production/
+sudo mv /vagrant/manifest/* /etc/puppetlabs/code/environments/production/manifests
+sudo service puppet restart
+sudo service puppetserver restart
+```
+
+Vamos al nodo `puppetagent1`
+
+```
+vagrant ssh puppetagent1
+sudo service puppet restart
+sudo /opt/puppetlabs/puppet/bin/puppet agent -t
+```
+
 # Instalacion y configuracion de Puppet por medio de Vagrant
 
 El procedimiento a realizar esta dado por el despliegue y configuracion de Puppet. Posteriormente se anexan los manifest, files y scripts soportan el despliegue y configuración de HTCondor a través de Puppet. 

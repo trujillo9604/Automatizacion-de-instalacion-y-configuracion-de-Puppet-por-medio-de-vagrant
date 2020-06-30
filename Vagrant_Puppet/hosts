@@ -1,9 +1,8 @@
 127.0.0.1       localhost
    
-192.168.20.18   puppet@example.com         puppet 
-192.168.20.19   puppetagent1@example.com   puppetagent1
-192.168.20.20   puppetagent2@example.com   puppetagent2
-
+192.168.20.18   puppet.example.com         puppet 
+192.168.20.19   puppetagent1.example.com   puppetagent1
+192.168.20.20   puppetagent2.example.com   puppetagent2
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     ip6-localhost   ip6-loopback
