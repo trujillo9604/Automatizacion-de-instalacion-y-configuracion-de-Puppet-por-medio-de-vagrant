@@ -55,6 +55,36 @@ SCRIPT
 #Nodo de trabajo 1 
 
 Vagrant.configure('2') do |config|
+
+#Maquina puppet master
+
+    config.vm.define "puppet" do |puppet|
+    
+# Box a utilizar, previamente descargado
+        puppet.vm.box = 'ubuntu/xenial64'
+
+#Hostname
+        puppet.vm.hostname = "puppet"
+
+#IP privada
+        puppet.vm.network 'private_network', ip: '192.168.20.18'
+
+
+#Aprovisionamiento de maquina 
+        
+        puppet.vm.provision "shell", inline:  $script, privileged: true, reset: true
+        puppet.vm.provision "shell", path:    "anadir_hostname.sh", privileged: true
+        #puppet.vm.provision "shell", path:    "certificar_nodos.sh", privileged: true
+        
+        
+
+#Personalizar maquina virtual    
+        puppet.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--memory", 3072]   
+
+        end 
+    end
+
          config.vm.define "puppetagent1" do |puppetagent1|
   
 # Box a utilizar, previamente descargado
@@ -73,8 +103,8 @@ Vagrant.configure('2') do |config|
 
         puppetagent1.vm.provision "shell", inline: "sudo hostnamectl set-hostname puppetagent1"
         puppetagent1.vm.provision "shell", inline:  $script2, privileged: true, reset: true
-        puppetagent1.vm.provision "file", source: "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
-        puppetagent1.vm.provision "shell", path: "añadir_hostname.sh", privileged: true
+        #puppetagent1.vm.provision "file", source: "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
+        puppetagent1.vm.provision "shell", path: "anadir_hostname.sh", privileged: true
         puppetagent1.vm.provision "shell", path: "Puppet.conf_agentes.sh", privileged: true    
             
     end 
@@ -100,41 +130,11 @@ Vagrant.configure('2') do |config|
 
         puppetagent2.vm.provision "shell", inline: "sudo hostnamectl set-hostname puppetagent2"
         puppetagent2.vm.provision "shell", inline:  $script2, privileged: true, reset: true
-        puppetagent2.vm.provision "file", source: "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
-        puppetagent2.vm.provision "shell", path: "añadir_hostname.sh", privileged: true
+        #puppetagent2.vm.provision "file", source: "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
+        puppetagent2.vm.provision "shell", path: "anadir_hostname.sh", privileged: true
         puppetagent2.vm.provision "shell", path: "Puppet.conf_agentes.sh", privileged: true    
             
     end 
 
-
-#Maquina puppet master
-
-    config.vm.define "puppet" do |puppet|
-    
-# Box a utilizar, previamente descargado
-        puppet.vm.box = 'ubuntu/xenial64'
-
-#Hostname
-        puppet.vm.hostname = "puppet"
-
-#IP privada
-        puppet.vm.network 'private_network', ip: '192.168.20.18'
-
-
-#Aprovisionamiento de maquina 
-        
-        puppet.vm.provision "shell", inline:  $script, privileged: true, reset: true
-        puppet.vm.provision "file",  source:  "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
-        puppet.vm.provision "shell", path:    "añadir_hostname.sh", privileged: true
-        puppet.vm.provision "shell", path:    "certificar_nodos.sh", privileged: true
-        
-        
-
-#Personalizar maquina virtual    
-        puppet.vm.provider :virtualbox do |vb|
-        vb.customize ["modifyvm", :id, "--memory", 3072]   
-
-        end 
-    end
 
 end
