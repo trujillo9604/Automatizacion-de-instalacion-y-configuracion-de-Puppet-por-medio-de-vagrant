@@ -1,5 +1,7 @@
 # Pasos para ejecución
 
+Antes de ejecutar el entorno virtual, verificar las ubicaciones de las carpetas y scripts necesarios para el correcto funcionamiento.
+
 Ingresar al directorio `Vagrant_Puppet` y ejecutar
 
 ```
@@ -21,22 +23,73 @@ sudo /opt/puppetlabs/puppet/bin/puppet cert sign puppetagent1.example.com
 sudo /opt/puppetlabs/puppet/bin/puppet cert sign puppetagent2.example.com
 ```
 
-Move el directorio `/vagrant/modules` al `/etc/puppetlabs/code/environments/production/`
+Mover el directorio `/vagrant/modules` al `/etc/puppetlabs/code/environments/production/`
 
 ```
 sudo mv /vagrant/modules /etc/puppetlabs/code/environments/production/
 sudo mv /vagrant/manifest/* /etc/puppetlabs/code/environments/production/manifests
-sudo service puppet restart
+#sudo service puppet restart
 sudo service puppetserver restart
 ```
 
-Vamos al nodo `puppetagent1`
+Ahora nos dirigimos al `puppetagent1` y verificamos su funcionamiento con el puppetmaster
 
 ```
 vagrant ssh puppetagent1
-sudo service puppet restart
+#sudo service puppet restart
 sudo /opt/puppetlabs/puppet/bin/puppet agent -t
 ```
+
+# Despliegue de HTCondor por medio de Puppet.
+
+Finalizado el despliegue de Puppet en las 3 maquinas virtuales, se procede a desplegar el gestor de cola de tareas HTCondor. Para esta operacion se anexan los manifest encargados de la configuracion de cada nodo cliente puppet, requeridos por puppet master.
+
+Para ejecutar el manifest por parte de cada nodo cliente ingresamos a cada cliente por ssh y digitamos el siguiente comando:
+
+```
+vagrant ssh puppetagent1
+sudo /opt/puppetlabs/puppet/bin/puppet agent -t
+```
+
+Lo mismo se realiza con el resto de clientes puppet.
+
+Como resultado debemo tener un gestor de cola de tareas desplegad y configurado. Para su comprobacion ingresamos a la maquina puppetagent1 y escribimos:
+
+```
+vagrant ssh puppetagent1
+condor_status
+```
+
+Devolviendonos como resultado el nombre de la maquina puppetagent2, el cual se comportara como un worker de HTCondor.
+
+
+# Archivos Manifest 
+
+
+Los archivos manifest de Puppet son los archivos donde se declaran todos los recursos, es decir, servicios, paquetes o archivos que deben verificarse y cambiarse. Cada manifest tendra el estado deseado para cada nodo cliente, y el puppet master se encargara de efectuar  y supervisar correctamente su configuracion. Los archivos manifest de Puppet se crean en la maquina Puppet master y tienen la extensión .pp.
+
+Estos archivos son compuestos por las siguientes carpetas. 
+
+ * Files: Son los archivos de texto sin formato que se deben importar y colocar en la ubicación de destino. 
+ * Resources: Los recursos representan los elementos que necesitamos evaluar o cambiar. Los recursos pueden ser archivos, paquetes, etc. 
+ * Node definition: Es un bloque de código en Puppet donde se define toda la información y definición del nodo del cliente. 
+ * Templates: Los templates se utilizan para crear archivos de configuración en los nodos y se pueden reutilizar más tarde. 
+ * Classes: Las classes son lo que utilizamos para agrupar los diferentes tipos de recursos.
+        
+Teniendo en cuenta lo anterior se exponen las recomendaciones para que el manifest de HTCondor sea tomado correctamente por puppet.
+
+#### Indicaciones en la maquina puppet master
+
+* Se guardan los manifest subido al repositorio en la carpeta manifest de puppetserver. Esta carpeta se encuentra ubicada en                                                     /etc/puppetlabs/puppet/code/environment/production/manifest.
+* La carpeta modules subido al repositorio, sera reemplazada con el modules de puppet server en la ubicacion /etc/puppetlabs/puppet/code/environment/production/modules.         Esta carpeta contiene los files necesarios para configurar el entorno de HTCondor.
+        
+#### Indicaciones en los clientes Puppet
+
+Teniendo ya los manifest y files necesarios alojados en el servidor master de puppet, se procede a pedir la configuracion por parte de cada nodo cliente al puppet             master. Para que este proceso se concluya de manera satisfactoria se debe habe realizado paso a paso las instrucciones dictadas, en las que incluyen, modificar las            ubicaciones de las carpetas, scripts y lo mas importante, tener el cliente verificado y certificado por el puppet server. El comando a correr es el siguiente.
+        
+        /opt/puppetlabs/puppet/bin/puppet agent -t 
+       
+Inmediatamente el cliente puppet realizara una peticion a traves del puerto 8140 al puppet server y el puppet server, en funcion del manifest añadido en sus carpetas,        procedera a realizar el despliegue de configuracion para dicho nodo. Esto aplica para todo los dos nodos de este entorno, obteniendo como resultado el despliegue y           configuracion del pool de HTCondor en los dos nodos clientes puppet. El nodo puppetagent1 actuara como el master de HTCondor y el puppetagent2 sera un worker del pool de      HTCondor. 
 
 # Instalacion y configuracion de Puppet por medio de Vagrant
 
@@ -214,32 +267,7 @@ Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppe
         puppet.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", 3072]   
 
-# Despliegue de HTCondor por medio de Puppet.
 
-Finalizado el despliegue de Puppet en las 3 maquinas virtuales y posterior a esto, cada nodo con rol cliente puppet siendo certificado, se procede a desplegar el gestor de cola de tareas. Para esta operacion se anexan los manifest encargados de la configuracion de cada nodo cliente puppet. Es decir, cada manifest tendra el estado deseado para cada nodo cliente, y el puppet master se encargara de efectuar  y supervisar correctamente su configuracion. 
-
-Los archivos manifest de Puppet son los archivos donde se declaran todos los recursos, es decir, servicios, paquetes o archivos que deben verificarse y cambiarse. Los archivos manifest de Puppet se crean en Puppet master y tienen la extensión .pp. Estos archivos son compuestos por las siguientes carpetas. 
-
- * Files: Son los archivos de texto sin formato que se deben importar y colocar en la ubicación de destino. 
- * Resources: Los recursos representan los elementos que necesitamos evaluar o cambiar. Los recursos pueden ser archivos, paquetes, etc. 
- * Node definition: Es un bloque de código en Puppet donde se define toda la información y definición del nodo del cliente. 
- * Templates: Los templates se utilizan para crear archivos de configuración en los nodos y se pueden reutilizar más tarde. 
- * Classes: Las classes son lo que utilizamos para agrupar los diferentes tipos de recursos.
-        
-Teniendo en cuenta lo anterior se exponen las recomendaciones para que el manifest de HTCondor sea tomado correctamente por puppet.
-
-#### Indicaciones en la maquina puppet master
-
-* Se guardan los manifest subido al repositorio en la carpeta manifest de puppetserver. Esta carpeta se encuentra ubicada en                                                     /etc/puppetlabs/puppet/code/environment/production/manifest.
-* La carpeta modules subido al repositorio, sera reemplazada con el modules de puppet server en la ubicacion /etc/puppetlabs/puppet/code/environment/production/modules.         Esta carpeta contiene los files necesarios para configurar el entorno de HTCondor.
-        
-#### Indicaciones en los clientes Puppet
-
-Teniendo ya los manifest y files necesarios alojados en el servidor master de puppet, se procede a pedir la configuracion por parte de cada nodo cliente al puppet             master. Para que este proceso se concluya de manera satisfactoria se debe habe realizado paso a paso las instrucciones dictadas, en las que incluyen, modificar las            ubicaciones de las carpetas, scripts y lo mas importante, tener el cliente verificado y certificado por el puppet server. El comando a correr es el siguiente.
-        
-        /opt/puppetlabs/puppet/bin/puppet agent -t 
-       
-Inmediatamente el cliente puppet realizara una peticion a traves del puerto 8140 al puppet server y el puppet server, en funcion del manifest añadido en sus carpetas,        procedera a realizar el despliegue de configuracion para dicho nodo. Esto aplica para todo los dos nodos de este entorno, obteniendo como resultado el despliegue y           configuracion del pool de HTCondor en los dos nodos clientes puppet. El nodo puppetagent1 actuara como el master de HTCondor y el puppetagent2 sera un worker del pool de      HTCondor. 
         
         
         
