@@ -5,31 +5,26 @@ Antes de ejecutar el entorno virtual, verificar las ubicaciones de las carpetas 
 Ingresar al directorio `Vagrant_Puppet` y ejecutar
 
 ```
-vagrant up
+sh iniciar.sh
 ```
 
-Para validar la instalación se debe ejecutar los siguientes comandos:
+Finalizada la ejecucion del script, configuraremos la certificados de clientes por parte de puppet:
+
+
+
+
+
 
 
 ```
 vagrant ssh puppet
-sudo /opt/puppetlabs/puppet/bin/puppet cert list
+sudo /opt/puppetlabs/bin/puppet cert sign --all
 ```
-
-Firmar los nodos.
-
-```
-sudo /opt/puppetlabs/puppet/bin/puppet cert sign puppetagent1.example.com
-sudo /opt/puppetlabs/puppet/bin/puppet cert sign puppetagent2.example.com
-```
-
-Mover el directorio `/vagrant/modules` al `/etc/puppetlabs/code/environments/production/`
+Con el paso anterior, los clientes puppet quedaran firmados, por el puppet master. Ahora mover el directorio `/vagrant/modules` al `/etc/puppetlabs/code/environments/production/`
 
 ```
 sudo mv /vagrant/modules /etc/puppetlabs/code/environments/production/
 sudo mv /vagrant/manifest/* /etc/puppetlabs/code/environments/production/manifests
-#sudo service puppet restart
-sudo service puppetserver restart
 ```
 
 Ahora nos dirigimos al `puppetagent1` y verificamos su funcionamiento con el puppetmaster
