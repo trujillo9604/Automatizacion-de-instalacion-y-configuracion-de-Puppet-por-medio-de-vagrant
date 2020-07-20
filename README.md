@@ -4,45 +4,39 @@ Antes de ejecutar el entorno virtual, modificar la ubicacion de la carpeta en la
 
 Ingresar al directorio `Vagrant_Puppet` y ejecutar
 
-```
- ./iniciar.sh
-```
+    ./iniciar.sh
+
 
 Finalizada la ejecucion del script, ejecutar todo lo relacionado con Puppet en modo root. Configurar la certificacion de clientes puppet por parte de puppet master:
 
-```
-sudo /opt/puppetlabs/bin/puppet cert sign --all
-sudo systemctl restart puppetserver.service
-```
+
+    sudo /opt/puppetlabs/bin/puppet cert sign --all
+    sudo systemctl restart puppetserver.service
 
 Mover las carpetas "modules" y "manifest" de /home/vagrant a /etc/puppetlabs/code/enviroment/production
 
-```
-sudo mv /home/vagrant/modules/condor /etc/puppetlabs/code/environments/production/modules/
-sudo mv /home/vagrant/manifest/ /etc/puppetlabs/code/environments/production/manifests
-```
+    sudo mv /home/vagrant/modules/condor /etc/puppetlabs/code/environments/production/modules/
+    sudo mv /home/vagrant/manifest/ /etc/puppetlabs/code/environments/production/manifests
+
 
 Ahora nos dirigimos al `puppetagent1` y verificamos su funcionamiento con el puppetmaster
 
-```
-vagrant ssh puppetagent1
-sudo /opt/puppetlabs/puppet/bin/puppet agent -t
-```
+
+    vagrant ssh puppetagent1
+    sudo /opt/puppetlabs/puppet/bin/puppet agent -t
 
 Por ultimo nos dirigimos al `puppetagent2` y realizamos el proceso anterior. 
 
-```
-vagrant ssh puppetagent2
-sudo /opt/puppetlabs/puppet/bin/puppet agent -t
-```
+    vagrant ssh puppetagent2
+    sudo /opt/puppetlabs/puppet/bin/puppet agent -t
 
 Nos aseguramos que el despliegue de HTCondor se encuentre correctamente configurado, dirigiendonos nuevamente al `puppetagent1`
 
-```
-vagrant ssh puppetagent
-condor_status 
-condor_q
-```
+
+    vagrant ssh puppetagent
+    condor_status 
+    condor_q
+    
 Con los comandos descritos anteriormente se observa el pool de HTCondor y la información relaciona con trabajos en la cola de tareas, respectivamente.
 
 
