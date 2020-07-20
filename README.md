@@ -8,7 +8,7 @@ Ingresar al directorio `Vagrant_Puppet` y ejecutar
  ./iniciar.sh
 ```
 
-Finalizada la ejecucion del script, se configura la certificacion de clientes puppet por parte de puppet master:
+Finalizada la ejecucion del script, ejecutar todo lo relacionado con Puppet en modo root. Configurar la certificacion de clientes puppet por parte de puppet master:
 
 ```
 sudo /opt/puppetlabs/bin/puppet cert sign --all
@@ -19,10 +19,8 @@ Mover las carpetas "modules" y "manifest" de /home/vagrant a /etc/puppetlabs/cod
 
 ```
 sudo mv /home/vagrant/modules/condor /etc/puppetlabs/code/environments/production/modules/
-sudo mv /vagrant/manifest/ /etc/puppetlabs/code/environments/production/manifests
+sudo mv /home/vagrant/manifest/ /etc/puppetlabs/code/environments/production/manifests
 ```
-
-Con el paso anterior, estaria listo para que cada cliente puppet pueda obtener y ejecutar su manifest, genrando la instalacion y despliegue de HTCondorl
 
 Ahora nos dirigimos al `puppetagent1` y verificamos su funcionamiento con el puppetmaster
 
@@ -38,67 +36,35 @@ vagrant ssh puppetagent2
 sudo /opt/puppetlabs/puppet/bin/puppet agent -t
 ```
 
-Nos aseguramos que el despliegue de HTCondor se encuentre correctamente configurado. Nos dirijimos nuevamente al `puppetagent1`
+Nos aseguramos que el despliegue de HTCondor se encuentre correctamente configurado, dirigiendonos nuevamente al `puppetagent1`
 
 ```
 vagrant ssh puppetagent
 condor_status 
 condor_q
 ```
-Con los comandos anteriores debemos observar el pool de HTCondor y la información relaciona con trabajos en la cola de tareas, respectivamente.
+Con los comandos descritos anteriormente se observa el pool de HTCondor y la información relaciona con trabajos en la cola de tareas, respectivamente.
 
 
+# Explicacion del fichero Vagrant file, con relacion a la instalacion y configuracion de Puppet por medio de Vagrant
 
+El procedimiento a realizar esta dado por el despliegue y configuracion de Puppet. Posteriormente se anexan los manifest, files y scripts que soportan el despliegue y configuración de HTCondor a través de Puppet. 
 
-# Archivos Manifest 
+El entorno en el que se desarrolla este proyecto esta dado por 3 maquinas virtuales, generadas con Vagrant (herramienta para la creación y configuración de entornos de desarrollo virtualizados). Se tendran dos arquitecturas desplegadas con la ayuda de Vagrant, el cual sera master-agent, perteneciente al gestor de configuracion Puppet y al finalizar el despliegue y configuracion de Puppet, se tendra otra arquitectura perteneciente a HTCondor (master-worker), la cual nos la facilitara el gestor de configuracion Puppet. Estas tres maquinas virtuales tendran como nombre: 
 
+* puppet, quien asume el rol de Puppet master, 
 
-Los archivos manifest de Puppet son los archivos donde se declaran todos los recursos, es decir, servicios, paquetes o archivos que deben verificarse y cambiarse. Cada manifest tendra el estado deseado para cada nodo cliente, y el puppet master se encargara de efectuar  y supervisar correctamente su configuracion. Los archivos manifest de Puppet se crean en la maquina Puppet master y tienen la extensión .pp.
+* puppetagent1 y puppetagent2, quienes seran las maquinas encargadas de ser dotadas por un gestor de cola de tareas, a traves de Puppet y a su ves seran             clientes puppet.
 
-Estos archivos son compuestos por las siguientes carpetas. 
+Finalizado el despliegue de Puppet, se debera certificar los clientes Puppet de forma manual. El Puppet master debe aprobar una solicitud de certificado para cada nodo agente antes de poder tomar sus manifest.  El despliegue de HTCondor estara dado posteriormente a la creacion de las maquinas virtuales. Puppet sera el encargado de ejecutar la configuracion de HTCondor en 2 de los 3 nodos creados con anterioridad. Esto se explicara en el transcurso del readme.
 
- * Files: Son los archivos de texto sin formato que se deben importar y colocar en la ubicación de destino. 
- * Resources: Los recursos representan los elementos que necesitamos evaluar o cambiar. Los recursos pueden ser archivos, paquetes, etc. 
- * Node definition: Es un bloque de código en Puppet donde se define toda la información y definición del nodo del cliente. 
- * Templates: Los templates se utilizan para crear archivos de configuración en los nodos y se pueden reutilizar más tarde. 
- * Classes: Las classes son lo que utilizamos para agrupar los diferentes tipos de recursos.
+Las recomendaciones a tener en cuenta para que este entorno funcione correctamente son los siguientes.
+
+* La maquina puppet master tendra el nombre de puppet y los nodos clientes tendran el nombre de puppetagent1 y puppetagent2.   
+* Para establecer un password para el usuario root basta con digitar el comando (sudo passwd root).
+* La maquina que sera puppet master debera tener como minimo 3 gigas de Ram, debido a que en la inicializacion del proceso (puppetserver.service) en su archivo de   configuracion viene por defecto para uso de 2 gigas de ram despues de su instalacion. Esto se puede modificar en su propio archivo de configuracion ubicado en     /etc/puppetlabs/puppet/puppet.conf. Puppet Server es el software que se instala una unica ves en el puppet master y es el encargado de hacer cumplir el rol de     nodo master.  Para uso de este despliegue se han otorgado estas 3 gigas de Ram a la maquina virtual puppet master y asi evitar problemas en el despliegue.
         
-Teniendo en cuenta lo anterior se exponen las recomendaciones para que el manifest de HTCondor sea tomado correctamente por puppet.
 
-#### Indicaciones en la maquina puppet master
-
-* Se guardan los manifest subido al repositorio en la carpeta manifest de puppetserver. Esta carpeta se encuentra ubicada en                                                     /etc/puppetlabs/puppet/code/environment/production/manifest.
-* La carpeta modules subido al repositorio, sera reemplazada con el modules de puppet server en la ubicacion /etc/puppetlabs/puppet/code/environment/production/modules.         Esta carpeta contiene los files necesarios para configurar el entorno de HTCondor.
-        
-#### Indicaciones en los clientes Puppet
-
-Teniendo ya los manifest y files necesarios alojados en el servidor master de puppet, se procede a pedir la configuracion por parte de cada nodo cliente al puppet             master. Para que este proceso se concluya de manera satisfactoria se debe habe realizado paso a paso las instrucciones dictadas, en las que incluyen, modificar las            ubicaciones de las carpetas, scripts y lo mas importante, tener el cliente verificado y certificado por el puppet server. El comando a correr es el siguiente.
-        
-        /opt/puppetlabs/puppet/bin/puppet agent -t 
-       
-Inmediatamente el cliente puppet realizara una peticion a traves del puerto 8140 al puppet server y el puppet server, en funcion del manifest añadido en sus carpetas,        procedera a realizar el despliegue de configuracion para dicho nodo. Esto aplica para todo los dos nodos de este entorno, obteniendo como resultado el despliegue y           configuracion del pool de HTCondor en los dos nodos clientes puppet. El nodo puppetagent1 actuara como el master de HTCondor y el puppetagent2 sera un worker del pool de      HTCondor. 
-
-# Instalacion y configuracion de Puppet por medio de Vagrant
-
-El procedimiento a realizar esta dado por el despliegue y configuracion de Puppet. Posteriormente se anexan los manifest, files y scripts soportan el despliegue y configuración de HTCondor a través de Puppet. 
-
-El entorno en el que se desarrolla este proyecto esta dado por 3 maquinas virtuales, generadas con Vagrant (herramienta para la creación y configuración de entornos de desarrollo virtualizados). Se tendran dos arquitecturas desplegadas con la ayuda de Vagrant, el cual sera master-agent, perteneciente al gestor de configuracion Puppet y al finalizar el despliegue y configuracion de Puppet, se tendra una arquitectura perteneciente a HTCondor (master-worker), la cual nos la facilitara el gestor de configuracion Puppet. Estas tres maquinas virtuales tendran como nombre: 
-
-* puppet, quien sera el Puppet master de este entorno, 
-
-* puppetagent1 y puppetagent2, quienes seran las maquinas que se encargaran de ser dotadas de un gestor de cola de tareas, a traves de Puppet y a su ves seran                  clientes puppet.
-
-Gracias al archivo Vagrantfile que se anexa en este repositorio, se permite agilizar la instalacion y configuracion del gestor de configuraciones Puppet, entregando como resultado una maquina con rol master y 2 maquinas como clientes, debidamente configuradas por el archivo Vagrantfile y certificadas por el puppet master para su posterior uso.
-El Puppet master debe aprobar una solicitud de certificado para cada nodo agente antes de poder configurarlo. Este proceso se encuentra automatizado dentro del archivo Vagrantfile.  El despliegue de HTCondor estara dado posteriormente a la creacion de las maquinas virtuales. Puppet sera el encargado de gestar la configuracion de HTCondor en 2 de los 3 nodos creados con anterioridad. Esto se explicara en el transcurso del readme.
-
-Las recomendaciones a tener en cuenta para que este entorno funcione conrrectamente y Puppet no presente problema alguno, es el siguiente.
-
-* Se anota que la maquina puppet master tendra el nombre de puppet y los nodos clientes tendran el nombre de puppetagent1 y puppetagent2.  
-* Verificar y corregir las ubicaciones de cada proceso de aprovisionamiento (script, sincronizacion de carpeta compartida) en el archivo Vagrantfile.
-* La ejecucion de cualquier comando para el trabajo o configuracion de puppet en las maquinas virtuales debe ser efectuado con usuario root. 
-* Teniendo en cuenta la recomendacion anterior, se anota que para establecer un password para el usuario root basta con digitar el comando (sudo passwd                         root).
-* La maquina que sera puppet master debera tener como minimo 3 gigas de Ram, debido a que en la inicializacion del proceso (puppetserver.service) en su archivo de               configuracion viene por defecto para uso de 2 gigas de ram despues de su instalacion. Esto se puede modificar en su propio archivo de configuracion ubicado en                 /etc/puppetlabs/puppet/puppet.conf. Puppet Server es el software que se instala una unica ves en el puppet master y es el encargado de hacer cumplir el rol de                 nodo master.  Para uso de este despliegue se han otorgado estas 3 gigas de Ram a la maquina virtual puppet master y asi evitar problemas en el despliegue.
-        
 A continuacion se muestra el archivo Vagrantfile, exponiendo los scripts utilizados y el aprovisionamiento para cada maquina desarrollado.
 
 # Instalacion de puppet-server y puppet-agent en la maquina master de puppet
@@ -125,7 +91,7 @@ El box utilizado para las 3 maquinas virtuales sera /ubuntu/xenial64.
         sudo apt-get -y install puppet-agent
         sudo apt-get -y install puppetserver
 
-* Nos asegurarnos de que el puppetserver.service y el firewall permitan que el proceso JVM de Puppet Server acepte conexiones en el puerto 8140. Además, los clientes puppet deben poder realizar la conexión al maestro en ese mismo puerto. Esta configuracion es predeterminada para esta herramienta.
+* Nos asegurarnos de que el puppetserver.service y el firewall permitan que el proceso JVM de Puppet Server acepte conexiones en el puerto 8140. Además, los clientes puppet deben poder realizar la conexión al maestro en ese mismo puerto.
 
         sudo ufw allow 8140   
 
@@ -134,9 +100,41 @@ El box utilizado para las 3 maquinas virtuales sera /ubuntu/xenial64.
         sudo systemctl  start   puppetserver.service
         sudo systemctl  enable  puppetserver.service
 
+# Archivos Manifest 
+
+Los archivos manifest de Puppet son ficheros en donde se declaran todos los recursos, servicios, o paquetes que deben verificarse y cambiarse. Cada manifest tendra el estado deseado para cada cliente Puppet y el puppet master se encargara de efectuar y supervisar correctamente esa configuracion. Los archivos manifest de Puppet se crean en la maquina Puppet master y tienen la extensión .pp.
+
+Estos archivos son compuestos por las siguientes carpetas. 
+
+ * Files: Son los archivos de texto sin formato que se deben importar y colocar en la ubicación de destino. 
+ * Resources: Los recursos representan los elementos que necesitamos evaluar o cambiar. Los recursos pueden ser archivos, paquetes, etc. 
+ * Node definition: Es un bloque de código en Puppet donde se define toda la información y definición del nodo del cliente. 
+ * Templates: Los templates se utilizan para crear archivos de configuración en los nodos y se pueden reutilizar más tarde. 
+ * Classes: Las classes son lo que utilizamos para agrupar los diferentes tipos de recursos.
+        
+Teniendo en cuenta lo anterior se exponen las recomendaciones para que el manifest de HTCondor sea tomado correctamente por puppet.
+
+#### Indicaciones en la maquina puppet master
+
+* Se guardan los manifest subido al repositorio en la carpeta manifest de puppetserver. Esta carpeta se encuentra ubicada en                                         /etc/puppetlabs/puppet/code/environment/production/manifest.
+* La carpeta con el nombre "modules" ubicada en el repositorio, sera reemplazada con el "modules" de puppet server en la ubicacion                                   /etc/puppetlabs/puppet/code/environment/production/modules. Esta carpeta contiene los files necesarios para configurar el entorno de HTCondor.
+        
+#### Indicaciones en los clientes Puppet
+
+Teniendo los manifest y files necesarios alojados en el servidor master de puppet, se procede a pedir la configuracion por parte de cada nodo cliente al puppet  master. El comando a correr es el siguiente.
+        
+        sudo /opt/puppetlabs/puppet/bin/puppet agent -t 
+       
+Inmediatamente el cliente puppet realizara una peticion a traves del puerto 8140 al puppet server y el puppet server, en funcion del manifest añadido en sus carpetas, procedera a realizar el despliegue de la configuracion para dicho nodo. Esto aplica para todo los dos nodos de este entorno, obteniendo como resultado el despliegue y configuracion del pool de HTCondor. El nodo puppetagent1 actuara como el master de HTCondor y el puppetagent2 sera un worker del pool de      HTCondor. 
+
 # Firmar certificados de los clientes puppet
 
-En este desarrollo, las maquinas tienen un orden para crearse con Vagrant. Es decir, inicialmente se deben crear las maquinas clientes puppet (puppetagent1 y                 puppetagent2) y por ultimo el puppet master. Esto es debido a que el servicio puppetserver.service debe recibir un certificado SSL por parte de cada cliente puppet y         posteriormente ser validadas (firmadas) por el puppetserver. Si creamos primero la maquina puppet master y luego los clientes puppet, indicara que primero se iniciara el      servicio puppetser.service y hasta ese momento no existira ningun agente creado para certificar. En el momento que los agentes son creados, las maquinas pueden ser           firmadas por el nodo puppet master, pero se debera reiniciar el servicio puppetserver.service. Con este orden de creacion nos evitamos ese paso y tendremos un despliegue     mucho mas automatizado con Vagrant.
+Cuando el software Puppet se ejecuta por primera vez en cualquier cliente Puppet, genera un certificado y envía la solicitud de firma del certificado al Puppet Master. Antes de que el servidor Puppet pueda comunicarse y controlar los nodos de agente, debe firmar el certificado de ese nodo de agente en particular. 
+Este proceso ya se encuentra establecido en el despliegue del Vagrant file, dejando solamente la firma del certificado por parte de Puppet master.
+
+        sudo /opt/puppetlabs/puppet/bin/puppet cert list --all 
+        systemctl restart puppetserver.service
+
 
 # Instalacion de puppet-agent en los nodos clientes puppet
 
@@ -164,7 +162,7 @@ En este desarrollo, las maquinas tienen un orden para crearse con Vagrant. Es de
 
 En el proceso anterior se muestras los scripts para dotar las maquinas con los softwares necesarios. A continuacion se muestra la configuracion de cada maquina virtual creada:
 
-Como se menciono anteriormente, inicialemente se crea las maquina clientes puppet y luego el puppet master.
+Como se menciono anteriormente, inicialmente se crean las maquina clientes puppet y luego el puppet master.
 
 * Nodo cliente puppet 1 
 
@@ -180,23 +178,24 @@ Como se menciono anteriormente, inicialemente se crea las maquina clientes puppe
 
 * IP privada
         
-        puppetagent1.vm.network 'private_network', ip: '192.168.20.19'
+        puppetagent1.vm.network 'private_network', ip: '192.168.20.21'
 
 * Aprovisionamiento de maquina 
 
         puppetagent1.vm.provision "shell", inline: "sudo hostnamectl set-hostname puppetagent1"
-        puppetagent1.vm.provision "shell", inline:  $script2, privileged: true, reset: true
+        puppetagent1.vm.provision "file",  source: "/home/fabian/Música/prueba3 /Vagrant_Puppet", destination: "$HOME"        
+        puppetagent1.vm.provision "shell", inline:  $script2, privileged: true 
+        puppetagent1.vm.provision "shell", path:   "añadir_hostname.sh", privileged: true
+        puppetagent1.vm.provision "shell", path:   "Puppet.conf_agentes.sh", privileged: true
+        puppetagent1.vm.provision "shell", inline: "sudo /opt/puppetlabs/bin/puppet agent --test" 
 
-* Modificar archivo hosts
+* Modificar archivo hosts con el script "añadir hostname" ubicado en la linea 189
 
-Este archivo ubicado en /etc/hosts permite apuntar un nombre de dominio de nuestra elección a un servidor en concreto, a un ordenador en red local o a nuestra misma máquina a través de su IP, alias o dominio. Este archivo se modifica por medio del script "hosts.sh" el cual permite reemplazar el archivo propio de la maquina virtual creada, con un archivo hosts creado por nosotros, con la informacion de red de cada nodo. Debido a que trabajamos en un entorno virtual, tuvimos que apoyarnos en el recurso file de Vagrant, con el proposito de sincronizar la carpeta en donde se aloja nuestro archivo hosts y posteriormente poder reemplazarlo.
+Este archivo ubicado en /etc/hosts permite apuntar un nombre de dominio de nuestra elección a un servidor en concreto, a un ordenador en red local o a nuestra misma máquina a través de su IP, alias o dominio. Este archivo se modifica por medio del script "añadir_hostname" el cual permite reemplazar el archivo propio de la maquina virtual creada, con un archivo hosts creado por nosotros.
 
-        puppetagent1.vm.provision "file", source: "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
-        puppetagent1.vm.provision "shell", path: "añadir_hostname.sh", privileged: true
+* Designar quien es el puppet master en las maquinas clientes de puppet        
 
-* Designar quien es su master        
-
-Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppet con relacion a master-agent, cada agente puppet debe conocer de antemano quien su master y esta configuracion se automatiza por medio del script "Puppet.conf_agentes.sh", el cual escribe en el archivo de configuracion de Puppet agent, instalado previamente en la maquina cliente y añade la linea de quien es su server. Este proceso queda automatizado por medio del script.
+La arquitectura que maneja Puppet (master-agent), implica que cada cliente puppet debe conocer de antemano quien sera el master. Esta configuracion se automatiza por medio del script "Puppet.conf_agentes.sh", el cual escribe en el archivo de configuracion del cliente Puppet, quien es puppet master. 
 
         puppetagent1.vm.provision "shell", path: "Puppet.conf_agentes.sh", privileged: true    
          
@@ -214,16 +213,18 @@ Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppe
 
 * IP privada
 
-        puppetagent2.vm.network 'private_network', ip: '192.168.20.20'
+        puppetagent2.vm.network 'private_network', ip: '192.168.20.22'
 
 * Aprovisionamiento de maquina 
 
         puppetagent2.vm.provision "shell", inline: "sudo hostnamectl set-hostname puppetagent2"
-        puppetagent2.vm.provision "shell", inline:  $script2, privileged: true, reset: true
-        puppetagent2.vm.provision "file", source: "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
-        puppetagent2.vm.provision "shell", path: "añadir_hostname.sh", privileged: true
-        puppetagent2.vm.provision "shell", path: "Puppet.conf_agentes.sh", privileged: true    
-     
+        puppetagent2.vm.provision "file",  source: "/home/fabian/Música/prueba3 /Vagrant_Puppet", destination: "$HOME"        
+        puppetagent2.vm.provision "shell", inline:  $script2, privileged: true
+        puppetagent2.vm.provision "shell", path:   "añadir_hostname.sh",     privileged: true
+        puppetagent2.vm.provision "shell", path:   "Puppet.conf_agentes.sh", privileged: true
+        puppetagent2.vm.provision "shell", inline: "sudo /opt/puppetlabs/bin/puppet agent --test"    
+    
+    
 * Maquina puppet master
 
         config.vm.define "puppet" do |puppet|
@@ -237,33 +238,17 @@ Es muy importante anotar en este punto, que dad la arquitectura que maneja Puppe
 
 * IP privada
         
-        puppet.vm.network 'private_network', ip: '192.168.20.18'
+        puppet.vm.network 'private_network', ip: '192.168.20.23'
 
 
 * Aprovisionamiento de maquina 
         
-        puppet.vm.provision "shell", inline:  $script, privileged: true, reset: true
-        puppet.vm.provision "file",  source:  "/home/fabian/Documentos/segunda_prueba", destination: "$HOME/archivos"        
-        puppet.vm.provision "shell", path:    "añadir_hostname.sh", privileged: true
-        puppet.vm.provision "shell", path:    "certificar_nodos.sh", privileged: true
+        puppet.vm.provision "shell", inline:  $script, privileged: true
+        puppet.vm.provision "file",  source:  "/home/fabian/Música/prueba3 /Vagrant_Puppet", destination: "$HOME"        
+        puppet.vm.provision "shell", path:    "añadir_hostname.sh",  privileged: true
         
-        
-
+    
 * Personalizar maquina virtual    
         
         puppet.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", 3072]   
-
-
-        
-        
-        
-        
-
-
-
-
-
-
-
-
