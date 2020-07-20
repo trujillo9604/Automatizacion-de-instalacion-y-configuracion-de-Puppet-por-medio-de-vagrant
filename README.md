@@ -1,61 +1,53 @@
 # Pasos para ejecución
 
-Antes de ejecutar el entorno virtual, verificar las ubicaciones de las carpetas y scripts necesarios para el correcto funcionamiento.
+Antes de ejecutar el entorno virtual, modificar la ubicacion de la carpeta en la linea 114 del aprovisionamiento de la maquina virtual Puppet en el archivo "Vagrant file".
 
 Ingresar al directorio `Vagrant_Puppet` y ejecutar
 
 ```
-sh iniciar.sh
+ ./iniciar.sh
 ```
 
-Finalizada la ejecucion del script, configuraremos la certificados de clientes por parte de puppet:
-
-
-
-
-
-
+Finalizada la ejecucion del script, se configura la certificacion de clientes puppet por parte de puppet master:
 
 ```
-vagrant ssh puppet
 sudo /opt/puppetlabs/bin/puppet cert sign --all
+sudo systemctl restart puppetserver.service
 ```
-Con el paso anterior, los clientes puppet quedaran firmados, por el puppet master. Ahora mover el directorio `/vagrant/modules` al `/etc/puppetlabs/code/environments/production/`
+
+Mover las carpetas "modules" y "manifest" de /home/vagrant a /etc/puppetlabs/code/enviroment/production
 
 ```
-sudo mv /vagrant/modules /etc/puppetlabs/code/environments/production/
-sudo mv /vagrant/manifest/* /etc/puppetlabs/code/environments/production/manifests
+sudo mv /home/vagrant/modules/condor /etc/puppetlabs/code/environments/production/modules/
+sudo mv /vagrant/manifest/ /etc/puppetlabs/code/environments/production/manifests
 ```
+
+Con el paso anterior, estaria listo para que cada cliente puppet pueda obtener y ejecutar su manifest, genrando la instalacion y despliegue de HTCondorl
 
 Ahora nos dirigimos al `puppetagent1` y verificamos su funcionamiento con el puppetmaster
 
 ```
 vagrant ssh puppetagent1
-#sudo service puppet restart
 sudo /opt/puppetlabs/puppet/bin/puppet agent -t
 ```
 
-# Despliegue de HTCondor por medio de Puppet.
-
-Finalizado el despliegue de Puppet en las 3 maquinas virtuales, se procede a desplegar el gestor de cola de tareas HTCondor. Para esta operacion se anexan los manifest encargados de la configuracion de cada nodo cliente puppet, requeridos por puppet master.
-
-Para ejecutar el manifest por parte de cada nodo cliente ingresamos a cada cliente por ssh y digitamos el siguiente comando:
+Por ultimo nos dirigimos al `puppetagent2` y realizamos el proceso anterior. 
 
 ```
-vagrant ssh puppetagent1
+vagrant ssh puppetagent2
 sudo /opt/puppetlabs/puppet/bin/puppet agent -t
 ```
 
-Lo mismo se realiza con el resto de clientes puppet.
-
-Como resultado debemo tener un gestor de cola de tareas desplegad y configurado. Para su comprobacion ingresamos a la maquina puppetagent1 y escribimos:
+Nos aseguramos que el despliegue de HTCondor se encuentre correctamente configurado. Nos dirijimos nuevamente al `puppetagent1`
 
 ```
-vagrant ssh puppetagent1
-condor_status
+vagrant ssh puppetagent
+condor_status 
+condor_q
 ```
+Con los comandos anteriores debemos observar el pool de HTCondor y la información relaciona con trabajos en la cola de tareas, respectivamente.
 
-Devolviendonos como resultado el nombre de la maquina puppetagent2, el cual se comportara como un worker de HTCondor.
+
 
 
 # Archivos Manifest 
