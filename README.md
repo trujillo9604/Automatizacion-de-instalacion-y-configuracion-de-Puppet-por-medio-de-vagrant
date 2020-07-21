@@ -5,17 +5,16 @@ Ingresar al directorio `Vagrant_Puppet` y ejecutar
     ./iniciar.sh
 
 
-Finalizada la ejecucion del script, ejecutar todo lo relacionado con Puppet en modo root. Configurar la certificacion de clientes puppet por parte de puppet master:
-
-
-    sudo /opt/puppetlabs/bin/puppet cert sign --all
-    sudo systemctl restart puppetserver.service
-
-Mover las carpetas "modules" y "manifest" de /home/vagrant a /etc/puppetlabs/code/enviroment/production
+Finalizada la ejecucion del script, ejecutar todo lo relacionado con Puppet en modo root. Copiar las carpetas "modules" y "manifest" de /vagrant a /etc/puppetlabs/code/enviroment/production
 
     sudo cp -r /vagrant/modules/condor /etc/puppetlabs/code/environments/production/modules/
     sudo cp -r /vagrant/manifests/ /etc/puppetlabs/code/environments/production/
 
+Configurar la certificacion de clientes puppet por parte de puppet master:
+
+
+    sudo /opt/puppetlabs/bin/puppet cert sign --all
+    sudo systemctl restart puppetserver.service
 
 Ahora nos dirigimos al `puppetagent1` y verificamos su funcionamiento con el puppetmaster
 
