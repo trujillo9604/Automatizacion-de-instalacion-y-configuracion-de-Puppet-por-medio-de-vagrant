@@ -16,7 +16,7 @@ Finalizada la ejecucion del script, ejecutar todo lo relacionado con Puppet en m
 Mover las carpetas "modules" y "manifest" de /home/vagrant a /etc/puppetlabs/code/enviroment/production
 
     sudo mv /home/vagrant/modules/condor /etc/puppetlabs/code/environments/production/modules/
-    sudo mv /home/vagrant/manifest/ /etc/puppetlabs/code/environments/production/manifests
+    sudo mv /home/vagrant/manifests/ /etc/puppetlabs/code/environments/production/
 
 
 Ahora nos dirigimos al `puppetagent1` y verificamos su funcionamiento con el puppetmaster
@@ -28,7 +28,7 @@ Ahora nos dirigimos al `puppetagent1` y verificamos su funcionamiento con el pup
 Por ultimo nos dirigimos al `puppetagent2` y realizamos el proceso anterior. 
 
     vagrant ssh puppetagent2
-    sudo /opt/puppetlabs/puppet/bin/puppet agent -t
+    sudo pas
 
 Nos aseguramos que el despliegue de HTCondor se encuentre correctamente configurado, dirigiendonos nuevamente al `puppetagent1`
 
