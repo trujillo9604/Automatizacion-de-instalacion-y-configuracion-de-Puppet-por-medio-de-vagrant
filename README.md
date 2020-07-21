@@ -1,7 +1,5 @@
 # Pasos para ejecución
 
-Antes de ejecutar el entorno virtual, modificar la ubicacion de la carpeta en la linea 114 del aprovisionamiento de la maquina virtual Puppet en el archivo "Vagrant file".
-
 Ingresar al directorio `Vagrant_Puppet` y ejecutar
 
     ./iniciar.sh
@@ -28,7 +26,7 @@ Ahora nos dirigimos al `puppetagent1` y verificamos su funcionamiento con el pup
 Por ultimo nos dirigimos al `puppetagent2` y realizamos el proceso anterior. 
 
     vagrant ssh puppetagent2
-    sudo pas
+    sudo /opt/puppetlabs/puppet/bin/puppet agent -t
 
 Nos aseguramos que el despliegue de HTCondor se encuentre correctamente configurado, dirigiendonos nuevamente al `puppetagent1`
 
@@ -177,13 +175,12 @@ Como se menciono anteriormente, inicialmente se crean las maquina clientes puppe
 * Aprovisionamiento de maquina 
 
         puppetagent1.vm.provision "shell", inline: "sudo hostnamectl set-hostname puppetagent1"
-        puppetagent1.vm.provision "file",  source: "/home/fabian/Música/prueba3 /Vagrant_Puppet", destination: "$HOME"        
         puppetagent1.vm.provision "shell", inline:  $script2, privileged: true 
         puppetagent1.vm.provision "shell", path:   "añadir_hostname.sh", privileged: true
         puppetagent1.vm.provision "shell", path:   "Puppet.conf_agentes.sh", privileged: true
         puppetagent1.vm.provision "shell", inline: "sudo /opt/puppetlabs/bin/puppet agent --test" 
 
-* Modificar archivo hosts con el script "añadir hostname" ubicado en la linea 189
+* Reemplazar el archivo hosts con el script "añadir hostname"
 
 Este archivo ubicado en /etc/hosts permite apuntar un nombre de dominio de nuestra elección a un servidor en concreto, a un ordenador en red local o a nuestra misma máquina a través de su IP, alias o dominio. Este archivo se modifica por medio del script "añadir_hostname" el cual permite reemplazar el archivo propio de la maquina virtual creada, con un archivo hosts creado por nosotros.
 
@@ -212,7 +209,6 @@ La arquitectura que maneja Puppet (master-agent), implica que cada cliente puppe
 * Aprovisionamiento de maquina 
 
         puppetagent2.vm.provision "shell", inline: "sudo hostnamectl set-hostname puppetagent2"
-        puppetagent2.vm.provision "file",  source: "/home/fabian/Música/prueba3 /Vagrant_Puppet", destination: "$HOME"        
         puppetagent2.vm.provision "shell", inline:  $script2, privileged: true
         puppetagent2.vm.provision "shell", path:   "añadir_hostname.sh",     privileged: true
         puppetagent2.vm.provision "shell", path:   "Puppet.conf_agentes.sh", privileged: true
@@ -238,7 +234,6 @@ La arquitectura que maneja Puppet (master-agent), implica que cada cliente puppe
 * Aprovisionamiento de maquina 
         
         puppet.vm.provision "shell", inline:  $script, privileged: true
-        puppet.vm.provision "file",  source:  "/home/fabian/Música/prueba3 /Vagrant_Puppet", destination: "$HOME"        
         puppet.vm.provision "shell", path:    "añadir_hostname.sh",  privileged: true
         
     
