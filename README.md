@@ -13,8 +13,8 @@ Finalizada la ejecucion del script, ejecutar todo lo relacionado con Puppet en m
 
 Mover las carpetas "modules" y "manifest" de /home/vagrant a /etc/puppetlabs/code/enviroment/production
 
-    sudo mv /vagrant/modules/condor /etc/puppetlabs/code/environments/production/modules/
-    sudo mv /vagrant/manifests/ /etc/puppetlabs/code/environments/production/
+    sudo cp -r /vagrant/modules/condor /etc/puppetlabs/code/environments/production/modules/
+    sudo cp -r /vagrant/manifests/ /etc/puppetlabs/code/environments/production/
 
 
 Ahora nos dirigimos al `puppetagent1` y verificamos su funcionamiento con el puppetmaster
