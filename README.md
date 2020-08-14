@@ -30,7 +30,7 @@ Por ultimo nos dirigimos al `puppetagent2` y realizamos el proceso anterior.
 Nos aseguramos que el despliegue de HTCondor se encuentre correctamente configurado, dirigiendonos nuevamente al `puppetagent1`
 
 
-    vagrant ssh puppetagent
+    vagrant ssh puppetagent1
     condor_status 
     condor_q
     
