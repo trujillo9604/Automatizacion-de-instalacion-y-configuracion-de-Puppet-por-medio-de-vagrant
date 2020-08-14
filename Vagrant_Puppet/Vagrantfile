@@ -26,7 +26,7 @@ sudo ufw allow 8140
 # Activacion de servicios
 
 sudo systemctl  start      puppetserver.service
-sudo systemctl  enable       puppetserver.service
+sudo systemctl  enable     puppetserver.service
 
 SCRIPT
 
