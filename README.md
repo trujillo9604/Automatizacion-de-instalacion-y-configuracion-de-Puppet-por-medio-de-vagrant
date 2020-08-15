@@ -1,6 +1,6 @@
 # Pasos para ejecución
 
-Ingresar al directorio `Vagrant_Puppet` y ejecutar
+Ejecutar el script `iniciar.sh` 
 
     ./iniciar.sh
 
